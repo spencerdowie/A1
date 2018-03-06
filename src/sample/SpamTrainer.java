@@ -3,18 +3,20 @@ package sample;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.awt.*;
 import java.io.*;
 import java.util.*;
 import java.util.List;
-// **************************************************//
 
 public class SpamTrainer {
     private Map<String, Integer> spamCounts, hamCounts;
     private Map<String, Double> ratioCounts;
     private Map<String, Integer> mapReference;
+    private List<String> CommonWords_List;
     private Double spamFiles = 0.0, hamFiles = 0.0, numTruePositives = 0.0, numTrueNegatives = 0.0, numFalsePositives = 0.0;
     public Double accuracy = 0.0, precision = 0.0;
+    private final String deliminator = "[\\s\\.;:\\?\\!,]";
+    private int TotalCommonWords;
+    //CommonWords_Array is included at the bottom of the class to reduce clutter
 
     public enum DataType
     {
@@ -36,8 +38,8 @@ public class SpamTrainer {
     private boolean isWord(String word)
     {
         // Ignore Common Words
-        //if(CommonWords_List.contains(word))
-        //    return false;
+        if(CommonWords_List.contains(word))
+            return false;
 
         String pattern = "^[a-z]+$";
         return word.matches(pattern);
@@ -154,7 +156,7 @@ public class SpamTrainer {
 
 
                 Scanner scanner = new Scanner(current);
-                scanner.useDelimiter("[\\s\\.;:\\?\\!,]");
+                scanner.useDelimiter(deliminator);
                 while (scanner.hasNext()) {
                     String word = scanner.next();
                     word = word.toLowerCase();
@@ -180,7 +182,7 @@ public class SpamTrainer {
         if(file.exists())
         {
             Scanner scanner = new Scanner(file);
-            scanner.useDelimiter("[\\s\\.;:\\?\\!,]");
+            scanner.useDelimiter(deliminator);
             while(scanner.hasNext())
             {
                 String word = scanner.next();
@@ -233,8 +235,6 @@ public class SpamTrainer {
         return PSF;
     }
 
-    private int TotalCommonWords;
-    private List<String> CommonWords_List;
     private String[] CommonWords_Array =
             {
                     "a",

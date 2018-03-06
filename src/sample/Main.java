@@ -1,8 +1,6 @@
 package sample;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -17,7 +15,6 @@ import javafx.geometry.Insets;
 
 import java.io.File;
 
-// **************************************************//
 
 public class Main extends Application {
 
@@ -39,18 +36,23 @@ public class Main extends Application {
 
             File[] content = mainDirectory.listFiles();
 
+            long time = System.currentTimeMillis();
             // Training Set
             for (File current : content) {
                 if (current.getName().contains("train")) {
                     trainer.processTrainFolder(current);
                 }
             }
+
+            System.out.println("Train Time: " + (System.currentTimeMillis() - time));
+            time = System.currentTimeMillis();
             // Testing Set + Results
             for (File current : content) {
                 if (current.getName().contains("test")) {
                     files = trainer.processTestFolder(current);
                 }
             }
+            System.out.println("Test Time: " + (System.currentTimeMillis() - time));
 
         }
 
@@ -95,7 +97,6 @@ public class Main extends Application {
         summary.add(precField, 1, 1);
 
         layout = new BorderPane();
-        // Place UI elements
         layout.setCenter(table);
         layout.setBottom(summary);
 
