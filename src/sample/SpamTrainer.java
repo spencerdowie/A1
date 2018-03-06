@@ -6,48 +6,51 @@ import javafx.collections.ObservableList;
 import java.awt.*;
 import java.io.*;
 import java.util.*;
+// **************************************************//
 
 public class SpamTrainer {
     private Map<String, Integer> spamCounts, hamCounts;
+    private Map<String, Integer> mapReference;
     private Double spamFiles = 0.0, hamFiles = 0.0, numTruePositives = 0.0, numTrueNegatives = 0.0, numFalsePositives = 0.0;
     public Double accuracy = 0.0, precision = 0.0;
 
+    public enum DataType
+    {
+        Ham,
+        Spam
+    }
+
+    // Constructor creating necessary maps
     public SpamTrainer()
     {
         spamCounts = new TreeMap<>();
         hamCounts = new TreeMap<>();
     }
 
+    // Check if word is real
     private boolean isWord(String word)
     {
         String pattern = "^[a-z]+$";
         return word.matches(pattern);
     }
 
-    private void countSpam(String word)
+    // Add word to TreeMap
+    private void addWordToMap(String word, DataType type)
     {
-        if(spamCounts.containsKey(word))
-        {
-            int oldCount = spamCounts.get(word);
-            spamCounts.put(word, oldCount+1);
-        }
+        // Set Correct Reference
+        if(type == DataType.Ham)
+            mapReference = hamCounts;
         else
-        {
-            spamCounts.put(word, 1);
-        }
-    }
+            mapReference = spamCounts;
 
-    private void countHam(String word)
-    {
-        if(hamCounts.containsKey(word))
+        // Add word to relevent map
+        if(mapReference.containsKey(word))
         {
-            int oldCount = hamCounts.get(word);
-            hamCounts.put(word, oldCount+1);
+            int oldCount = mapReference.get(word);
+            mapReference.put(word, oldCount+1);
         }
         else
-        {
-            hamCounts.put(word, 1);
-        }
+            mapReference.put(word, 1);
     }
 
     public ObservableList<TestFile> processTestFolder(File file) throws IOException
@@ -60,6 +63,7 @@ public class SpamTrainer {
             if (folder.isDirectory()) {
                 String fileName = folder.getName();
                 String actualClass;
+
                 if (fileName.contains("ham")) {
                     actualClass = "ham";
                 } else {
@@ -67,6 +71,10 @@ public class SpamTrainer {
                 }
                 File[] contents = folder.listFiles();
                 for (File current : contents) {
+
+                    if(current.getName() == "cmds")
+                        break;
+
                     TestFile test = new TestFile(current.getName(), testFile(current), actualClass);
                     files.add(test);
                     if(test.getSpamProbability() > 0.5) {
@@ -104,21 +112,21 @@ public class SpamTrainer {
                     File[] contents = folder.listFiles();
                     for (File current : contents) {
                         hamFiles++;
-                        processHam(current);
+                        processData(current, DataType.Ham);
                     }
                 } else if (fileName.contains("spam")) {
 
                     File[] contents = folder.listFiles();
                     for (File current : contents) {
                         spamFiles++;
-                        processSpam(current);
+                        processData(current, DataType.Spam);
                     }
                 }
             }
         }
     }
 
-    public void processHam(File file) throws IOException
+    public void processData(File file, DataType data) throws IOException
     {
         if(file.exists())
         {
@@ -130,30 +138,14 @@ public class SpamTrainer {
                 word = word.toLowerCase();
                 if(isWord(word))
                 {
-                    countHam(word);
+                    addWordToMap(word, data);
                 }
             }
         }
     }
 
-    public void processSpam(File file) throws IOException
-    {
-        if(file.exists())
-        {
-            Scanner scanner = new Scanner(file);
-            scanner.useDelimiter("[\\s\\.;:\\?\\!,]");
-            while(scanner.hasNext())
-            {
-                String word = scanner.next();
-                word = word.toLowerCase();
-                if(isWord(word))
-                {
-                    countSpam(word);
-                }
-            }
-        }
-    }
 
+    // Returns spam probability of file (training is assumed to be complete)
     public Double testFile(File file) throws IOException
     {
         Double n = 0.0;

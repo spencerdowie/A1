@@ -1,6 +1,8 @@
 package sample;
 import java.text.DecimalFormat;
 
+// **************************************************//
+
 public class TestFile {
     private String filename;
     private double spamProbability;

@@ -17,6 +17,8 @@ import javafx.geometry.Insets;
 
 import java.io.File;
 
+// **************************************************//
+
 public class Main extends Application {
 
     private TableView<TestFile> table;
@@ -28,6 +30,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("Assignment 1");
 
+        // Get Folder that contains necessary ham and spam folder
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(new File("."));
         File mainDirectory = directoryChooser.showDialog(primaryStage);
@@ -35,6 +38,8 @@ public class Main extends Application {
         if(mainDirectory.isDirectory())
         {
             File[] content = mainDirectory.listFiles();
+
+            // Training Set
             for(File current: content)
             {
                 if(current.getName().contains("train"))
@@ -42,6 +47,7 @@ public class Main extends Application {
                     trainer.processTrainFolder(current);
                 }
             }
+            // Testing Set + Results
             for(File current: content)
             {
                 if(current.getName().contains("test"))
