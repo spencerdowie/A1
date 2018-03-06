@@ -11,6 +11,7 @@ import java.util.List;
 
 public class SpamTrainer {
     private Map<String, Integer> spamCounts, hamCounts;
+    private Map<String, Double> ratioCounts;
     private Map<String, Integer> mapReference;
     private Double spamFiles = 0.0, hamFiles = 0.0, numTruePositives = 0.0, numTrueNegatives = 0.0, numFalsePositives = 0.0;
     public Double accuracy = 0.0, precision = 0.0;
@@ -21,13 +22,12 @@ public class SpamTrainer {
         Spam
     }
 
-
-
     // Constructor creating necessary maps
     public SpamTrainer()
     {
         spamCounts = new TreeMap<>();
         hamCounts = new TreeMap<>();
+        ratioCounts = new TreeMap<>();
         TotalCommonWords = CommonWords_Array.length;
         CommonWords_List = Arrays.asList(CommonWords_Array);
     }
@@ -46,8 +46,6 @@ public class SpamTrainer {
     // Add word to TreeMap
     private void addWordToMap(String word, DataType type)
     {
-        // Ignore basic words
-
         // Set Correct Reference
         if(type == DataType.Ham)
             mapReference = hamCounts;
@@ -188,17 +186,44 @@ public class SpamTrainer {
                 String word = scanner.next();
                 word = word.toLowerCase();
 
-                // Check Worod
+                // Check Word
                 if(isWord(word)) {
 
-                    if (spamCounts.containsKey(word) && hamCounts.containsKey(word)) {
+                    // Check if result is stored already
+                    if(ratioCounts.containsKey(word))
+                    {
+                        //System.out.println(ratioCounts.get(word));
+                        n += ratioCounts.get(word);
+                    }
+                    // Else, If word is discovered in both maps, calculate probability
+                    else if (spamCounts.containsKey(word) && hamCounts.containsKey(word))
+                    {
                         Double PSW, PWS, PWH;
+                        Double PSW_B;
+                        int Count;
+                        int SpamWords = spamCounts.get(word);
+                        int HamWords = hamCounts.get(word);
 
-                        PWS = spamCounts.get(word) / spamFiles;
-                        PWH = hamCounts.get(word) / hamFiles;
+                        PWS = SpamWords / spamFiles;
+                        PWH = HamWords / hamFiles;
                         PSW = PWS / (PWS + PWH);
 
-                        n += Math.log(1 - PSW) - Math.log(PSW);
+                        Double Result = 0.0;
+
+                        if (PSW < 0.5) {
+                            // Alternate Method for probability that ends up lowering accuracy much more than its increases in precision
+                            Count = SpamWords + HamWords;
+                            PSW_B = (3 * (0.5) + Count * PSW) / (3 + Count);
+                            Result = Math.log(1 - PSW_B) - Math.log(PSW_B);
+                        } else {
+                            Result = Math.log(1 - PSW) - Math.log(PSW);
+                        }
+
+                        // Add already calculated result
+                        ratioCounts.put(word, Result);
+
+                        // Add value
+                        n += Result;
                     }
                 }
             }

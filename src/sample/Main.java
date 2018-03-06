@@ -35,26 +35,23 @@ public class Main extends Application {
         directoryChooser.setInitialDirectory(new File("."));
         File mainDirectory = directoryChooser.showDialog(primaryStage);
 
-        if(mainDirectory.isDirectory())
-        {
+        if(mainDirectory != null && mainDirectory.isDirectory()) {
+
             File[] content = mainDirectory.listFiles();
 
             // Training Set
-            for(File current: content)
-            {
-                if(current.getName().contains("train"))
-                {
+            for (File current : content) {
+                if (current.getName().contains("train")) {
                     trainer.processTrainFolder(current);
                 }
             }
             // Testing Set + Results
-            for(File current: content)
-            {
-                if(current.getName().contains("test"))
-                {
+            for (File current : content) {
+                if (current.getName().contains("test")) {
                     files = trainer.processTestFolder(current);
                 }
             }
+
         }
 
         table = new TableView<>();
