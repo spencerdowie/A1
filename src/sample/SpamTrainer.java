@@ -20,7 +20,7 @@ public class SpamTrainer {
 
     private boolean isWord(String word)
     {
-        String pattern = "^[a-zA-Z]+$";
+        String pattern = "^[a-z]+$";
         return word.matches(pattern);
     }
 
@@ -100,15 +100,17 @@ public class SpamTrainer {
             if (folder.isDirectory()) {
                 String fileName = folder.getName();
                 if (fileName.contains("ham")) {
-                    hamFiles++;
+
                     File[] contents = folder.listFiles();
                     for (File current : contents) {
+                        hamFiles++;
                         processHam(current);
                     }
                 } else if (fileName.contains("spam")) {
-                    spamFiles++;
+
                     File[] contents = folder.listFiles();
                     for (File current : contents) {
+                        spamFiles++;
                         processSpam(current);
                     }
                 }
@@ -125,6 +127,7 @@ public class SpamTrainer {
             while(scanner.hasNext())
             {
                 String word = scanner.next();
+                word = word.toLowerCase();
                 if(isWord(word))
                 {
                     countHam(word);
@@ -142,6 +145,7 @@ public class SpamTrainer {
             while(scanner.hasNext())
             {
                 String word = scanner.next();
+                word = word.toLowerCase();
                 if(isWord(word))
                 {
                     countSpam(word);
@@ -161,6 +165,7 @@ public class SpamTrainer {
             while(scanner.hasNext())
             {
                 String word = scanner.next();
+                word = word.toLowerCase();
                 if(isWord(word)) {
                     if (spamCounts.containsKey(word) && hamCounts.containsKey(word)) {
                         Double PSW, PWS, PWH;
